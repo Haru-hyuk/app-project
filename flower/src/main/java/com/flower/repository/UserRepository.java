@@ -1,0 +1,19 @@
+package com.flower.repository;
+
+import com.flower.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    Optional<User> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
+    boolean existsByNickname(String nickname);
+
+    Optional<User> findByUserNameAndUserBirth(String userName, String userBirth);
+
+    Optional<User> findByUserNameAndEmail(String userName, String email);
+}
