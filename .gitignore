@@ -1,0 +1,61 @@
+# ===============================
+# OS
+# ===============================
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+
+# ===============================
+# IDE
+# ===============================
+
+# Eclipse / STS
+.metadata
+bin/
+.settings/
+.classpath
+.project
+.springBeans
+.sts4-cache/
+
+# IntelliJ
+.idea/
+*.iml
+out/
+
+# VS Code / Cursor
+.vscode/
+.cursor/
+
+
+# ===============================
+# Java / Spring
+# ===============================
+
+# Gradle
+.gradle/
+build/
+
+# Maven
+target/
+
+# Compiled
+*.class
+
+# JVM crash logs
+hs_err_pid*
+replay_pid*
+
+
+# ===============================
+# Env / Secrets
+# ===============================
+.env
+.env.*
+application-local.yml
+application-dev.yml
+*.keystore
+*.jks
