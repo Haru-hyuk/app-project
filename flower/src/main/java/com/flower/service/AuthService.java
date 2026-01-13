@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -19,6 +21,8 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final BCryptPasswordEncoder passwordEncoder;
+
+    private static final int REFRESH_TOKEN_EXPIRE_DAYS = 14;
 
     /* =========================
        회원가입
@@ -60,20 +64,26 @@ public class AuthService {
             throw new RuntimeException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
 
+        // 토큰 생성
         String accessToken = jwtTokenProvider.generateAccessToken(user.getEmail());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail());
 
-        RefreshToken token = refreshTokenRepository
+        LocalDateTime expiredAt =
+                LocalDateTime.now().plusDays(REFRESH_TOKEN_EXPIRE_DAYS);
+
+        // 동일 유저 재로그인 시 Refresh Token 갱신
+        RefreshToken tokenEntity = refreshTokenRepository
                 .findByUserEmail(user.getEmail())
                 .orElse(
                         RefreshToken.builder()
                                 .userEmail(user.getEmail())
-                                .refreshToken(refreshToken)
+                                .token(refreshToken)
+                                .expiredAt(expiredAt)
                                 .build()
                 );
 
-        token.updateToken(refreshToken);
-        refreshTokenRepository.save(token);
+        tokenEntity.updateToken(refreshToken, expiredAt);
+        refreshTokenRepository.save(tokenEntity);
 
         return new TokenResponse(accessToken, refreshToken);
     }
@@ -84,17 +94,36 @@ public class AuthService {
     @Transactional
     public TokenResponse refresh(String refreshToken) {
 
-        RefreshToken saved = refreshTokenRepository.findByRefreshToken(refreshToken)
+        // 1. Refresh Token JWT 검증
+        if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
+            throw new RuntimeException("리프레시 토큰이 만료되었거나 유효하지 않습니다.");
+        }
+
+        // 2. DB에 저장된 토큰인지 확인
+        RefreshToken saved = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() ->
                         new RuntimeException("리프레시 토큰이 유효하지 않습니다.")
                 );
 
-        String email = saved.getUserEmail();
+        // 3. DB 기준 만료 체크
+        if (saved.isExpired()) {
+            throw new RuntimeException("리프레시 토큰이 만료되었습니다.");
+        }
 
-        String newAccess = jwtTokenProvider.generateAccessToken(email);
-        String newRefresh = jwtTokenProvider.generateRefreshToken(email);
+        // 4. 사용자 존재 여부 확인
+        User user = userRepository.findByEmail(saved.getUserEmail())
+                .orElseThrow(() ->
+                        new RuntimeException("존재하지 않는 사용자입니다.")
+                );
 
-        saved.updateToken(newRefresh);
+        // 5. 토큰 회전
+        String newAccess = jwtTokenProvider.generateAccessToken(user.getEmail());
+        String newRefresh = jwtTokenProvider.generateRefreshToken(user.getEmail());
+
+        LocalDateTime newExpiredAt =
+                LocalDateTime.now().plusDays(REFRESH_TOKEN_EXPIRE_DAYS);
+
+        saved.updateToken(newRefresh, newExpiredAt);
         refreshTokenRepository.save(saved);
 
         return new TokenResponse(newAccess, newRefresh);
@@ -105,7 +134,8 @@ public class AuthService {
        ========================= */
     @Transactional
     public void logout(String email) {
-        refreshTokenRepository.deleteById(email);
+        refreshTokenRepository.findByUserEmail(email)
+                .ifPresent(refreshTokenRepository::delete);
     }
 
     /* =========================
@@ -134,12 +164,13 @@ public class AuthService {
                         new RuntimeException("일치하는 계정을 찾을 수 없습니다.")
                 );
 
-        // 지금은 메일 없이 임시 비밀번호 로직만 준비
         String tempPassword = "temp1234";
-
         user.changePassword(passwordEncoder.encode(tempPassword));
     }
 
+    /* =========================
+       중복 체크
+       ========================= */
     public boolean checkEmailDuplicate(String email) {
         return userRepository.existsByEmail(email);
     }

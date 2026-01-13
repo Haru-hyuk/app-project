@@ -63,10 +63,21 @@ public class JwtTokenProvider {
         return parseClaims(token).getSubject();
     }
 
+    /** Access / Refresh 공용 검증 (예외 발생 시 throw) */
     public void validateTokenOrThrow(String token) {
         Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token);
+    }
+
+    /** Refresh Token 검증용 (true / false) */
+    public boolean validateRefreshToken(String token) {
+        try {
+            validateTokenOrThrow(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
 }
