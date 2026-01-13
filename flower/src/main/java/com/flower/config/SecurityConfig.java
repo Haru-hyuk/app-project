@@ -52,7 +52,7 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        // 🔓 인증 없이 허용 (Auth 관련 + 정적 리소스)
+                        // 🔓 인증 없이 허용 (Auth 관련 + 공개 API)
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/signup",
@@ -62,17 +62,20 @@ public class SecurityConfig {
                                 "/api/auth/find-email",
                                 "/api/auth/reset-password",
 
+                                "/api/shops/**",   // ✅ 이 줄 추가
+
                                 "/", "/index.html",
                                 "/assets/**",
                                 "/*.js", "/*.css", "/*.svg",
                                 "/*.png", "/*.ico", "/*.woff2"
                         ).permitAll()
 
-                        // 🔐 나머지 API는 JWT 인증 필요
+                        // 🔐 그 외 API는 JWT 필요
                         .requestMatchers("/api/**").authenticated()
 
                         .anyRequest().permitAll()
                 );
+
 
         // JWT 인증 필터 등록
         http.addFilterBefore(

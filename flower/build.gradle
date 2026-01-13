@@ -66,6 +66,8 @@ dependencies {
     /* Test */
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-security-test'
+    
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 /* 테스트 완전히 끌 거면 유지 */
