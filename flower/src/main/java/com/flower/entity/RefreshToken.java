@@ -3,24 +3,35 @@ package com.flower.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "REFRESH_TOKEN")
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 public class RefreshToken {
 
     @Id
-    @Column(name = "USER_EMAIL", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "USER_EMAIL", nullable = false, unique = true)
     private String userEmail;
 
-    @Column(name = "REFRESH_TOKEN", nullable = false)
-    private String refreshToken;
+    @Column(name = "TOKEN", nullable = false, length = 500)
+    private String token;
 
-    /** refresh token 갱신 메서드 */
-    public void updateToken(String newToken) {
-        this.refreshToken = newToken;
+    @Column(name = "EXPIRED_AT", nullable = false)
+    private LocalDateTime expiredAt;
+
+    public void updateToken(String newToken, LocalDateTime newExpiredAt) {
+        this.token = newToken;
+        this.expiredAt = newExpiredAt;
+    }
+
+    public boolean isExpired() {
+        return expiredAt.isBefore(LocalDateTime.now());
     }
 }

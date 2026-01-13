@@ -41,9 +41,9 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
 
-                // OAuth 로그인 때문에 세션 허용
+                // JWT 기반 인증 (세션 미사용)
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
                 .exceptionHandling(ex -> ex
@@ -52,21 +52,29 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        // 인증 없이 허용
+                        // 🔓 인증 없이 허용 (Auth 관련 + 정적 리소스)
                         .requestMatchers(
-                                "/api/auth/**",
+                                "/api/auth/login",
+                                "/api/auth/signup",
+                                "/api/auth/refresh",
+                                "/api/auth/check-email",
+                                "/api/auth/check-nickname",
+                                "/api/auth/find-email",
+                                "/api/auth/reset-password",
+
                                 "/", "/index.html",
-                                "/assets/**", "/*.js", "/*.css", "/*.svg",
+                                "/assets/**",
+                                "/*.js", "/*.css", "/*.svg",
                                 "/*.png", "/*.ico", "/*.woff2"
                         ).permitAll()
 
-                        // API는 JWT 필요
+                        // 🔐 나머지 API는 JWT 인증 필요
                         .requestMatchers("/api/**").authenticated()
 
                         .anyRequest().permitAll()
-
                 );
 
+        // JWT 인증 필터 등록
         http.addFilterBefore(
                 jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class
@@ -78,6 +86,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+
         config.setAllowCredentials(true);
         config.setAllowedOrigins(Arrays.asList(
                 "http://localhost:5173"
@@ -90,6 +99,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
+
         return source;
     }
 }
