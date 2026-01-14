@@ -3,10 +3,8 @@ package com.flower.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
-@Table(name = "REFRESH_TOKEN")
+@Table(name = "Refresh_Token")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -14,24 +12,13 @@ import java.time.LocalDateTime;
 public class RefreshToken {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "USER_EMAIL", nullable = false, unique = true)
+    @Column(name = "유저 이메일", nullable = false, unique = true)
     private String userEmail;
 
-    @Column(name = "TOKEN", nullable = false, length = 500)
+    @Column(name = "리프레쉬 토큰", length = 500)
     private String token;
 
-    @Column(name = "EXPIRED_AT", nullable = false)
-    private LocalDateTime expiredAt;
-
-    public void updateToken(String newToken, LocalDateTime newExpiredAt) {
+    public void updateToken(String newToken) {
         this.token = newToken;
-        this.expiredAt = newExpiredAt;
-    }
-
-    public boolean isExpired() {
-        return expiredAt.isBefore(LocalDateTime.now());
     }
 }
