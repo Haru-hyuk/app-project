@@ -13,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -23,8 +21,6 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final BCryptPasswordEncoder passwordEncoder;
-
-    private static final int REFRESH_TOKEN_EXPIRE_DAYS = 14;
 
     /* =========================
        회원가입
@@ -66,11 +62,10 @@ public class AuthService {
             throw new CustomException(ErrorCode.AUTH_UNAUTHORIZED);
         }
 
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getEmail());
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getEmail());
-
-        LocalDateTime expiredAt =
-                LocalDateTime.now().plusDays(REFRESH_TOKEN_EXPIRE_DAYS);
+        String accessToken =
+                jwtTokenProvider.generateAccessToken(user.getEmail());
+        String refreshToken =
+                jwtTokenProvider.generateRefreshToken(user.getEmail());
 
         RefreshToken tokenEntity = refreshTokenRepository
                 .findByUserEmail(user.getEmail())
@@ -78,11 +73,10 @@ public class AuthService {
                         RefreshToken.builder()
                                 .userEmail(user.getEmail())
                                 .token(refreshToken)
-                                .expiredAt(expiredAt)
                                 .build()
                 );
 
-        tokenEntity.updateToken(refreshToken, expiredAt);
+        tokenEntity.updateToken(refreshToken);
         refreshTokenRepository.save(tokenEntity);
 
         return new TokenResponse(accessToken, refreshToken);
@@ -94,32 +88,29 @@ public class AuthService {
     @Transactional
     public TokenResponse refresh(String refreshToken) {
 
-        // Refresh Token JWT 검증
+        // 1️⃣ Refresh Token JWT 검증 (exp 포함)
         if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
             throw new CustomException(ErrorCode.AUTH_INVALID_TOKEN);
         }
 
+        // 2️⃣ DB에 저장된 토큰과 비교
         RefreshToken saved = refreshTokenRepository.findByToken(refreshToken)
                 .orElseThrow(() ->
                         new CustomException(ErrorCode.AUTH_INVALID_TOKEN)
                 );
-
-        if (saved.isExpired()) {
-            throw new CustomException(ErrorCode.AUTH_EXPIRED_TOKEN);
-        }
 
         User user = userRepository.findByEmail(saved.getUserEmail())
                 .orElseThrow(() ->
                         new CustomException(ErrorCode.AUTH_UNAUTHORIZED)
                 );
 
-        String newAccess = jwtTokenProvider.generateAccessToken(user.getEmail());
-        String newRefresh = jwtTokenProvider.generateRefreshToken(user.getEmail());
+        // 3️⃣ 새 토큰 발급
+        String newAccess =
+                jwtTokenProvider.generateAccessToken(user.getEmail());
+        String newRefresh =
+                jwtTokenProvider.generateRefreshToken(user.getEmail());
 
-        LocalDateTime newExpiredAt =
-                LocalDateTime.now().plusDays(REFRESH_TOKEN_EXPIRE_DAYS);
-
-        saved.updateToken(newRefresh, newExpiredAt);
+        saved.updateToken(newRefresh);
         refreshTokenRepository.save(saved);
 
         return new TokenResponse(newAccess, newRefresh);
@@ -140,7 +131,10 @@ public class AuthService {
     public FindEmailResponse findEmail(FindEmailRequest req) {
 
         User user = userRepository
-                .findByUserNameAndUserBirth(req.getUserName(), req.getUserBirth())
+                .findByUserNameAndUserBirth(
+                        req.getUserName(),
+                        req.getUserBirth()
+                )
                 .orElseThrow(() ->
                         new CustomException(ErrorCode.INVALID_REQUEST)
                 );
@@ -155,7 +149,10 @@ public class AuthService {
     public void resetPassword(ResetPasswordRequest req) {
 
         User user = userRepository
-                .findByUserNameAndEmail(req.getUserName(), req.getEmail())
+                .findByUserNameAndEmail(
+                        req.getUserName(),
+                        req.getEmail()
+                )
                 .orElseThrow(() ->
                         new CustomException(ErrorCode.INVALID_REQUEST)
                 );
