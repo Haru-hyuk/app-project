@@ -14,31 +14,37 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "유저 고유번호")
+    @Column(name = "User_ID")
     private Long userId;
 
-    @Column(name = "유저 이메일 (PK)", unique = true)
+    @Column(name = "User_Email", unique = true)
     private String email;
 
-    @Column(name = "비밀번호")
+    @Column(name = "User_PW")
     private String password;
 
-    @Column(name = "닉네임", nullable = false)
+    @Column(name = "Nickname", nullable = false)
     private String nickname;
 
-    @Column(name = "이름", nullable = false)
+    @Column(name = "User_name", nullable = false)
     private String userName;
 
-    @Column(name = "생년월일", nullable = false)
+    @Column(name = "User_birth", nullable = false)
     private String userBirth;
 
-    @Column(name = "가입 경로")
-    private String signupPath;
+    @Column(name = "Oath_Provider")
+    private String oauthProvider;
 
-    @Column(name = "생성일")
+    @Column(name = "User_intro", length = 200)
+    private String userIntro;
+
+    @Column(name = "Profile_image", length = 500)
+    private String profileImage;
+
+    @Column(name = "Created_At")
     private LocalDateTime createdAt;
 
-    @Column(name = "수정일")
+    @Column(name = "Updated_At")
     private LocalDateTime updatedAt;
 
     @PrePersist
@@ -60,5 +66,25 @@ public class User {
 
     public void changeNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void changeUserIntro(String userIntro) {
+        this.userIntro = userIntro;
+    }
+
+    public void changeProfileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
+
+    public void updateProfile(String nickname, String userIntro, String profileImage) {
+        if (nickname != null && !nickname.isBlank()) {
+            this.nickname = nickname;
+        }
+        if (userIntro != null) {
+            this.userIntro = userIntro;
+        }
+        if (profileImage != null) {
+            this.profileImage = profileImage;
+        }
     }
 }

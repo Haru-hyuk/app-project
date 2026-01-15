@@ -5,25 +5,23 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Favorite", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"User_ID", "Flower_ID"})
-})
+@Table(name = "SearchHistory")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class Favorites {
+public class SearchHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Favorite_ID")
-    private Long favoriteId;
+    @Column(name = "Search_ID")
+    private Long searchId;
 
     @Column(name = "User_ID", nullable = false)
     private Long userId;
 
-    @Column(name = "Flower_ID", nullable = false)
-    private Long flowerId;
+    @Column(name = "Search_Detail", nullable = false, length = 500)
+    private String searchDetail;
 
     @Column(name = "Created_At")
     private LocalDateTime createdAt;

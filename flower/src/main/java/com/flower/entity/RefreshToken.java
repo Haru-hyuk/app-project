@@ -12,10 +12,10 @@ import lombok.*;
 public class RefreshToken {
 
     @Id
-    @Column(name = "유저 이메일", nullable = false, unique = true)
+    @Column(name = "User_Email", nullable = false, unique = true)
     private String userEmail;
 
-    @Column(name = "리프레쉬 토큰", length = 500)
+    @Column(name = "Refresh_Token", length = 500, nullable = false)
     private String token;
 
     public void updateToken(String newToken) {
