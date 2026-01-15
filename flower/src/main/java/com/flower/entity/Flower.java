@@ -2,7 +2,11 @@ package com.flower.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.List;
+
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "Flower")
@@ -14,24 +18,37 @@ public class Flower {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "꽃 고유번호")
+    @Column(name = "Flower_ID")
     private Long flowerId;
 
-    @Column(name = "꽃 이름", nullable = false)
+    @Column(name = "Flower_Name", nullable = false)
     private String flowerName;
 
-    @Column(name = "꽃말")
-    private String flowerMeaning;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "Floriography", columnDefinition = "JSON")
+    private List<String> floriography;
 
-    @Column(name = "꽃 키워드")
-    private String flowerKeywords;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "Flower_Keyword", columnDefinition = "JSON")
+    private List<String> flowerKeyword;
 
-    @Column(name = "꽃 이미지 주소", length = 500)
-    private String flowerImageUrl;
+    @Column(name = "Flower_Origin", columnDefinition = "TEXT")
+    private String flowerOrigin;
 
-    @Column(name = "주요 개화 계절", nullable = false, length = 50)
-    private String bloomingSeason;
+    @Column(name = "Flower_Describe", columnDefinition = "TEXT")
+    private String flowerDescribe;
 
-    @Column(name = "오늘의 꽃 날짜")
-    private String todayFlowerDate;
+    @Column(name = "Image_Url", length = 500)
+    private String imageUrl;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "Season", columnDefinition = "JSON")
+    private List<String> season;
+
+    @Column(name = "Today_Flower")
+    private LocalDate todayFlower;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "Embedding", columnDefinition = "JSON", nullable = false)
+    private List<Double> embedding;
 }
