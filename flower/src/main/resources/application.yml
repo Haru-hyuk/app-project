@@ -19,3 +19,8 @@ spring:
 
 kakao:
   rest-api-key: ${KAKAO_REST_API_KEY}
+
+deepseek:
+  api:
+    key: ${DEEPSEEK_API_KEY}
+

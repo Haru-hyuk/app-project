@@ -5,29 +5,34 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "SearchHistory")
+@Table(
+    name = "search_history",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "search_text"})
+    }
+)
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class SearchHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Search_ID")
     private Long searchId;
 
-    @Column(name = "User_ID", nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "Search_Detail", nullable = false, length = 500)
-    private String searchDetail;
+    @Column(name = "search_text", nullable = false, length = 200)
+    private String searchText;
 
-    @Column(name = "Created_At")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
+    @PreUpdate
+    void onSave() {
+        this.createdAt = LocalDateTime.now();
     }
 }
