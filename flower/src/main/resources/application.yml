@@ -1,26 +1,29 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: ${DB_URL}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
 
-  h2:
-    console:
-      enabled: true
+jwt:
+  secret: ${JWT_SECRET}
 
 kakao:
-  rest-api-key: ${KAKAO_REST_API_KEY}
+  rest-api-key: ${KAKAO_REST_API_KEY:demo-key}
 
 deepseek:
   api:
-    key: ${DEEPSEEK_API_KEY}
+    key: ${DEEPSEEK_API_KEY:demo-key}
 

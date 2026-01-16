@@ -52,7 +52,7 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        // 🔓 인증 없이 허용 (Auth 관련 + 공개 API)
+                        // 인증 없이 허용 (Auth 관련 + 정적 리소스)
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/signup",
@@ -62,15 +62,13 @@ public class SecurityConfig {
                                 "/api/auth/find-email",
                                 "/api/auth/reset-password",
 
-                                "/api/shops/**",   // ✅ 이 줄 추가
-
                                 "/", "/index.html",
                                 "/assets/**",
                                 "/*.js", "/*.css", "/*.svg",
                                 "/*.png", "/*.ico", "/*.woff2"
                         ).permitAll()
 
-                        // 🔐 그 외 API는 JWT 필요
+                        // 나머지 API는 JWT 필요 (즐겨찾기, 조회기록 등)
                         .requestMatchers("/api/**").authenticated()
 
                         .anyRequest().permitAll()
@@ -91,13 +89,12 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173"
-        ));
+        config.setAllowedOriginPatterns(Arrays.asList("*"));
         config.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
         ));
         config.setAllowedHeaders(Arrays.asList("*"));
+        config.setExposedHeaders(Arrays.asList("Authorization"));
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
