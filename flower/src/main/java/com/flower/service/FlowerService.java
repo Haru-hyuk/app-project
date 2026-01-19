@@ -30,11 +30,13 @@ public class FlowerService {
     }
 
     /**
-     * 오늘의 꽃 조회
+     * 오늘의 꽃 조회 (월일만 비교)
      */
     public FlowerResponse getTodayFlower() {
         LocalDate today = LocalDate.now();
-        return flowerRepository.findByTodayFlower(today)
+        int month = today.getMonthValue();
+        int day = today.getDayOfMonth();
+        return flowerRepository.findByTodayFlowerMonthAndDay(month, day)
                 .map(FlowerResponse::from)
                 .orElse(null);
     }
