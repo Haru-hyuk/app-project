@@ -23,15 +23,15 @@ public class ViewHistoryService {
     /**
      * 조회 기록 목록 조회
      */
-    public List<ViewHistoryResponse> getViewHistory(Long userId) {
+    public List<ViewHistoryResponse> getViewHistory(Integer userId) {
         List<ViewHistory> histories = viewHistoryRepository.findTop20ByUserIdOrderByCreatedAtDesc(userId);
 
         // 꽃 정보를 한 번에 조회
-        List<Long> flowerIds = histories.stream()
+        List<Integer> flowerIds = histories.stream()
                 .map(ViewHistory::getFlowerId)
                 .collect(Collectors.toList());
 
-        Map<Long, Flower> flowerMap = flowerRepository.findAllById(flowerIds)
+        Map<Integer, Flower> flowerMap = flowerRepository.findAllById(flowerIds)
                 .stream()
                 .collect(Collectors.toMap(Flower::getFlowerId, f -> f));
 
@@ -44,7 +44,7 @@ public class ViewHistoryService {
      * 조회 기록 저장
      */
     @Transactional
-    public void saveViewHistory(Long userId, Long flowerId) {
+    public void saveViewHistory(Integer userId, Integer flowerId) {
         // 꽃 존재 확인
         if (!flowerRepository.existsById(flowerId)) {
             throw new RuntimeException("꽃을 찾을 수 없습니다.");
@@ -62,7 +62,7 @@ public class ViewHistoryService {
      * 특정 조회 기록 삭제
      */
     @Transactional
-    public void deleteViewHistory(Long userId, Long viewId) {
+    public void deleteViewHistory(Integer userId, Integer viewId) {
         viewHistoryRepository.deleteByViewIdAndUserId(viewId, userId);
     }
 
@@ -70,7 +70,7 @@ public class ViewHistoryService {
      * 전체 조회 기록 삭제
      */
     @Transactional
-    public void deleteAllViewHistory(Long userId) {
+    public void deleteAllViewHistory(Integer userId) {
         viewHistoryRepository.deleteByUserId(userId);
     }
 }

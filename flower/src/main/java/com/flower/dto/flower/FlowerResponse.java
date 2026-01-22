@@ -14,7 +14,7 @@ import java.util.List;
 @Builder
 public class FlowerResponse {
 
-    private Long flowerId;
+    private Integer flowerId;
     private String flowerName;
     private List<String> floriography;
     private List<String> flowerKeyword;

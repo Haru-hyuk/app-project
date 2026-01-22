@@ -15,7 +15,7 @@ public class PopularKeyword {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Popular_Keyword_ID")
-    private Long popularKeywordId;
+    private Integer popularKeywordId;
 
     @Column(name = "Keyword", nullable = false, unique = true, length = 100)
     private String keyword;

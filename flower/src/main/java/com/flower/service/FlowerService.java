@@ -55,7 +55,7 @@ public class FlowerService {
     /**
      * 꽃 상세 정보 조회
      */
-    public FlowerResponse getFlowerDetail(Long flowerId, Long userId) {
+    public FlowerResponse getFlowerDetail(Integer flowerId, Integer userId) {
         Flower flower = flowerRepository.findById(flowerId)
                 .orElseThrow(() -> new RuntimeException("꽃을 찾을 수 없습니다."));
 
@@ -70,7 +70,7 @@ public class FlowerService {
     /**
      * 꽃 상세 정보 조회 (비로그인)
      */
-    public FlowerResponse getFlowerDetail(Long flowerId) {
+    public FlowerResponse getFlowerDetail(Integer flowerId) {
         return getFlowerDetail(flowerId, null);
     }
 

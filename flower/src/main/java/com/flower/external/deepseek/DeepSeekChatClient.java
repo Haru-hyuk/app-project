@@ -17,7 +17,7 @@ public class DeepSeekChatClient {
             .baseUrl("https://api.deepseek.com")
             .build();
 
-    @Value("${deepseek.api-key}")
+    @Value("${deepseek.api.key}")
     private String apiKey;
 
     public String generateMessage(String prompt) {

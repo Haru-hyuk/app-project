@@ -15,13 +15,13 @@ public class FlowerMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Message_ID")
-    private Long messageId;
+    private Integer messageId;
 
     @Column(name = "User_ID", nullable = false)
-    private Long userId;
+    private Integer userId;
 
     @Column(name = "Flower_ID", nullable = false)
-    private Long flowerId;
+    private Integer flowerId;
 
     @Column(name = "Message", columnDefinition = "TEXT")
     private String message;

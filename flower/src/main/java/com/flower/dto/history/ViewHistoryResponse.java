@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 @Builder
 public class ViewHistoryResponse {
 
-    private Long viewId;
-    private Long flowerId;
+    private Integer viewId;
+    private Integer flowerId;
     private String flowerName;
     private String imageUrl;
     private LocalDateTime createdAt;

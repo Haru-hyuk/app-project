@@ -14,8 +14,8 @@ import java.util.List;
 @Builder
 public class FavoriteResponse {
 
-    private Long favoriteId;
-    private Long flowerId;
+    private Integer favoriteId;
+    private Integer flowerId;
     private String flowerName;
     private List<String> floriography;
     private String imageUrl;

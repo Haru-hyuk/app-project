@@ -25,7 +25,7 @@ public class FavoriteController {
      */
     @GetMapping
     public ResponseEntity<List<FavoriteResponse>> getFavorites() {
-        Long userId = getCurrentUserId();
+        Integer userId = getCurrentUserId();
         return ResponseEntity.ok(favoriteService.getFavorites(userId));
     }
 
@@ -34,10 +34,10 @@ public class FavoriteController {
      */
     @PostMapping
     public ResponseEntity<FavoriteResponse> addFavorite(
-            @RequestBody Map<String, Long> body
+            @RequestBody Map<String, Integer> body
     ) {
-        Long userId = getCurrentUserId();
-        Long flowerId = body.get("flowerId");
+        Integer userId = getCurrentUserId();
+        Integer flowerId = body.get("flowerId");
         return ResponseEntity.ok(favoriteService.addFavorite(userId, flowerId));
     }
 
@@ -46,9 +46,9 @@ public class FavoriteController {
      */
     @DeleteMapping("/{flowerId}")
     public ResponseEntity<Map<String, String>> removeFavorite(
-            @PathVariable Long flowerId
+            @PathVariable Integer flowerId
     ) {
-        Long userId = getCurrentUserId();
+        Integer userId = getCurrentUserId();
         favoriteService.removeFavorite(userId, flowerId);
         return ResponseEntity.ok(Map.of("message", "즐겨찾기에서 삭제되었습니다."));
     }
@@ -58,16 +58,16 @@ public class FavoriteController {
      */
     @GetMapping("/check/{flowerId}")
     public ResponseEntity<Map<String, Object>> checkFavorite(
-            @PathVariable Long flowerId
+            @PathVariable Integer flowerId
     ) {
-        Long userId = getCurrentUserId();
+        Integer userId = getCurrentUserId();
         return ResponseEntity.ok(favoriteService.checkFavorite(userId, flowerId));
     }
 
     /**
      * 현재 로그인한 사용자 ID 조회
      */
-    private Long getCurrentUserId() {
+    private Integer getCurrentUserId() {
         String email = SecurityUtil.getCurrentUserEmail();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));

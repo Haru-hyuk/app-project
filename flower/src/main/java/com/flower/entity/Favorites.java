@@ -17,13 +17,13 @@ public class Favorites {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Favorite_ID")
-    private Long favoriteId;
+    private Integer favoriteId;
 
     @Column(name = "User_ID", nullable = false)
-    private Long userId;
+    private Integer userId;
 
     @Column(name = "Flower_ID", nullable = false)
-    private Long flowerId;
+    private Integer flowerId;
 
     @Column(name = "Created_At")
     private LocalDateTime createdAt;

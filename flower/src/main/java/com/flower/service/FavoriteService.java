@@ -23,15 +23,15 @@ public class FavoriteService {
     /**
      * 즐겨찾기 목록 조회
      */
-    public List<FavoriteResponse> getFavorites(Long userId) {
+    public List<FavoriteResponse> getFavorites(Integer userId) {
         List<Favorites> favorites = favoriteRepository.findByUserIdOrderByCreatedAtDesc(userId);
 
         // 꽃 정보를 한 번에 조회
-        List<Long> flowerIds = favorites.stream()
+        List<Integer> flowerIds = favorites.stream()
                 .map(Favorites::getFlowerId)
                 .collect(Collectors.toList());
 
-        Map<Long, Flower> flowerMap = flowerRepository.findAllById(flowerIds)
+        Map<Integer, Flower> flowerMap = flowerRepository.findAllById(flowerIds)
                 .stream()
                 .collect(Collectors.toMap(Flower::getFlowerId, f -> f));
 
@@ -44,7 +44,7 @@ public class FavoriteService {
      * 즐겨찾기 추가
      */
     @Transactional
-    public FavoriteResponse addFavorite(Long userId, Long flowerId) {
+    public FavoriteResponse addFavorite(Integer userId, Integer flowerId) {
         // 이미 즐겨찾기에 있는지 확인
         if (favoriteRepository.existsByUserIdAndFlowerId(userId, flowerId)) {
             throw new RuntimeException("이미 즐겨찾기에 추가된 꽃입니다.");
@@ -67,16 +67,16 @@ public class FavoriteService {
      * 즐겨찾기 삭제
      */
     @Transactional
-    public void removeFavorite(Long userId, Long flowerId) {
+    public void removeFavorite(Integer userId, Integer flowerId) {
         favoriteRepository.deleteByUserIdAndFlowerId(userId, flowerId);
     }
 
     /**
      * 즐겨찾기 여부 확인
      */
-    public Map<String, Object> checkFavorite(Long userId, Long flowerId) {
+    public Map<String, Object> checkFavorite(Integer userId, Integer flowerId) {
         boolean isFavorite = favoriteRepository.existsByUserIdAndFlowerId(userId, flowerId);
-        Long favoriteId = null;
+        Integer favoriteId = null;
 
         if (isFavorite) {
             favoriteId = favoriteRepository.findByUserIdAndFlowerId(userId, flowerId)
@@ -93,7 +93,7 @@ public class FavoriteService {
     /**
      * 즐겨찾기 개수 조회
      */
-    public long getFavoriteCount(Long userId) {
+    public long getFavoriteCount(Integer userId) {
         return favoriteRepository.countByUserId(userId);
     }
 }

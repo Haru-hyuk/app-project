@@ -13,7 +13,7 @@ import java.util.List;
 @Builder
 public class FlowerListResponse {
 
-    private Long flowerId;
+    private Integer flowerId;
     private String flowerName;
     private List<String> floriography;
     private List<String> flowerKeyword;
