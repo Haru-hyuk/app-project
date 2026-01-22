@@ -1,6 +1,8 @@
 package com.flower.service;
 
 import com.flower.dto.user.PasswordChangeRequest;
+import com.flower.dto.user.UserResponse;
+import com.flower.dto.user.UserUpdateRequest;
 import com.flower.entity.User;
 import com.flower.repository.UserRepository;
 import com.flower.security.SecurityUtil;
@@ -23,6 +25,30 @@ public class UserService {
         String email = SecurityUtil.getCurrentUserEmail();
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+    }
+
+    /** 현재 사용자 정보 조회 */
+    public UserResponse getCurrentUser() {
+        User user = getLoginUser();
+        return UserResponse.from(user);
+    }
+
+    /** 사용자 정보 수정 */
+    @Transactional
+    public UserResponse updateUser(UserUpdateRequest request) {
+        User user = getLoginUser();
+        
+        if (request.getNickname() != null && !request.getNickname().isBlank()) {
+            user.changeNickname(request.getNickname());
+        }
+        if (request.getUserIntro() != null) {
+            user.changeUserIntro(request.getUserIntro());
+        }
+        if (request.getProfileImage() != null) {
+            user.changeProfileImage(request.getProfileImage());
+        }
+        
+        return UserResponse.from(user);
     }
 
     /** 비밀번호 변경 */

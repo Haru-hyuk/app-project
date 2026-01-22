@@ -22,4 +22,7 @@ public interface FavoriteRepository extends JpaRepository<Favorites, Integer> {
 
     // 사용자의 즐겨찾기 개수
     long countByUserId(Integer userId);
+
+    // 사용자의 모든 즐겨찾기 삭제
+    void deleteByUserId(Integer userId);
 }
