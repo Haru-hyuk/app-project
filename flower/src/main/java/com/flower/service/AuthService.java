@@ -6,8 +6,11 @@ import com.flower.entity.RefreshToken;
 import com.flower.entity.User;
 import com.flower.exception.CustomException;
 import com.flower.exception.ErrorCode;
+import com.flower.repository.FavoriteRepository;
 import com.flower.repository.RefreshTokenRepository;
+import com.flower.repository.SearchHistoryRepository;
 import com.flower.repository.UserRepository;
+import com.flower.repository.ViewHistoryRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,6 +22,9 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final SearchHistoryRepository searchHistoryRepository;
+    private final ViewHistoryRepository viewHistoryRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -170,5 +176,31 @@ public class AuthService {
 
     public boolean checkNicknameDuplicate(String nickname) {
         return userRepository.existsByNickname(nickname);
+    }
+
+    /* =========================
+       회원 탈퇴
+       ========================= */
+    @Transactional
+    public void deleteAccount(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_UNAUTHORIZED));
+
+        // 비밀번호 검증
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new CustomException(ErrorCode.AUTH_UNAUTHORIZED);
+        }
+
+        Integer userId = user.getUserId();
+
+        // 연관 데이터 삭제
+        favoriteRepository.deleteByUserId(userId);
+        searchHistoryRepository.deleteByUserId(userId);
+        viewHistoryRepository.deleteByUserId(userId);
+        refreshTokenRepository.findByUserEmail(email)
+                .ifPresent(refreshTokenRepository::delete);
+
+        // 사용자 삭제
+        userRepository.delete(user);
     }
 }

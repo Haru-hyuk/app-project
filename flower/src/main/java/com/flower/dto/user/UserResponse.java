@@ -17,6 +17,8 @@ public class UserResponse {
     private String nickname;
     private String userName;
     private String userBirth;
+    private String userIntro;
+    private String profileImage;
 
     public static UserResponse from(User user) {
         return UserResponse.builder()
@@ -25,6 +27,8 @@ public class UserResponse {
                 .nickname(user.getNickname())
                 .userName(user.getUserName())
                 .userBirth(user.getUserBirth())
+                .userIntro(user.getUserIntro())
+                .profileImage(user.getProfileImage())
                 .build();
     }
 }

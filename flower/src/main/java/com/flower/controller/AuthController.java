@@ -86,4 +86,19 @@ public class AuthController {
                 "message", exists ? "이미 사용 중인 닉네임입니다." : "사용 가능한 닉네임입니다."
         ));
     }
+
+    /** 회원 탈퇴 */
+    @PostMapping("/delete-account")
+    public ResponseEntity<String> deleteAccount(
+            HttpServletRequest request,
+            @RequestBody DeleteAccountRequest req) {
+
+        String accessToken = jwtTokenProvider.resolveToken(request);
+        jwtTokenProvider.validateTokenOrThrow(accessToken);
+
+        String email = jwtTokenProvider.getEmailFromToken(accessToken);
+        authService.deleteAccount(email, req.getPassword());
+
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+    }
 }
