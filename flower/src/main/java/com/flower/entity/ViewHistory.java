@@ -15,13 +15,13 @@ public class ViewHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "View_ID")
-    private Long viewId;
+    private Integer viewId;
 
     @Column(name = "User_ID", nullable = false)
-    private Long userId;
+    private Integer userId;
 
     @Column(name = "Flower_ID", nullable = false)
-    private Long flowerId;
+    private Integer flowerId;
 
     @Column(name = "Created_At")
     private LocalDateTime createdAt;

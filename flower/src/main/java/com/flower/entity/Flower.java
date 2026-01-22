@@ -19,7 +19,7 @@ public class Flower {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Flower_ID")
-    private Long flowerId;
+    private Integer flowerId;
 
     @Column(name = "Flower_Name", nullable = false)
     private String flowerName;

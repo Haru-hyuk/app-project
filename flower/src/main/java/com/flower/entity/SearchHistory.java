@@ -19,10 +19,10 @@ public class SearchHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long searchId;
+    private Integer searchId;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private Integer userId;
 
     @Column(name = "search_text", nullable = false, length = 200)
     private String searchText;

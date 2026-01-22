@@ -10,7 +10,7 @@ public class KakaoMapClient {
 
     private final WebClient webClient;
 
-    public KakaoMapClient(@Value("${KAKAO_REST_API_KEY}") String apiKey) {
+    public KakaoMapClient(@Value("${kakao.rest-api-key}") String apiKey) {
         System.out.println("🔥 Kakao REST KEY = " + apiKey);
 
         this.webClient = WebClient.builder()

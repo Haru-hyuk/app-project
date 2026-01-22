@@ -5,17 +5,17 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface ViewHistoryRepository extends JpaRepository<ViewHistory, Long> {
+public interface ViewHistoryRepository extends JpaRepository<ViewHistory, Integer> {
 
     // 사용자의 조회 기록 목록 (최신순)
-    List<ViewHistory> findByUserIdOrderByCreatedAtDesc(Long userId);
+    List<ViewHistory> findByUserIdOrderByCreatedAtDesc(Integer userId);
 
     // 사용자의 최근 조회 기록 (제한)
-    List<ViewHistory> findTop20ByUserIdOrderByCreatedAtDesc(Long userId);
+    List<ViewHistory> findTop20ByUserIdOrderByCreatedAtDesc(Integer userId);
 
     // 특정 조회 기록 삭제
-    void deleteByViewIdAndUserId(Long viewId, Long userId);
+    void deleteByViewIdAndUserId(Integer viewId, Integer userId);
 
     // 사용자의 모든 조회 기록 삭제
-    void deleteByUserId(Long userId);
+    void deleteByUserId(Integer userId);
 }

@@ -7,15 +7,15 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SearchHistoryRepository
-        extends JpaRepository<SearchHistory, Long> {
+        extends JpaRepository<SearchHistory, Integer> {
 
     Optional<SearchHistory> findByUserIdAndSearchText(
-            Long userId, String searchText
+            Integer userId, String searchText
     );
 
-    List<SearchHistory> findTop10ByUserIdOrderByCreatedAtDesc(Long userId);
+    List<SearchHistory> findTop10ByUserIdOrderByCreatedAtDesc(Integer userId);
 
-    void deleteByUserIdAndSearchText(Long userId, String searchText);
+    void deleteByUserIdAndSearchText(Integer userId, String searchText);
 
-    void deleteByUserId(Long userId);
+    void deleteByUserId(Integer userId);
 }

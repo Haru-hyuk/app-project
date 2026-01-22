@@ -55,9 +55,9 @@ public class FlowerController {
      */
     @GetMapping("/{flowerId}")
     public ResponseEntity<FlowerResponse> getFlowerDetail(
-            @PathVariable Long flowerId
+            @PathVariable Integer flowerId
     ) {
-        Long userId = getCurrentUserIdOrNull();
+        Integer userId = getCurrentUserIdOrNull();
         return ResponseEntity.ok(flowerService.getFlowerDetail(flowerId, userId));
     }
 
@@ -84,7 +84,7 @@ public class FlowerController {
     /**
      * 현재 로그인한 사용자 ID 조회 (없으면 null)
      */
-    private Long getCurrentUserIdOrNull() {
+    private Integer getCurrentUserIdOrNull() {
         try {
             String email = SecurityUtil.getCurrentUserEmail();
             if (email == null || email.equals("anonymousUser")) {

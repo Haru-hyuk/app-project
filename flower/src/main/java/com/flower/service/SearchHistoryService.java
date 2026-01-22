@@ -16,7 +16,7 @@ public class SearchHistoryService {
     private static final int MAX_HISTORY = 10;
 
     @Transactional
-    public void save(Long userId, String query) {
+    public void save(Integer userId, String query) {
 
         repository.findByUserIdAndSearchText(userId, query)
                 .ifPresentOrElse(
@@ -41,7 +41,7 @@ public class SearchHistoryService {
         }
     }
 
-    public List<String> getRecent(Long userId) {
+    public List<String> getRecent(Integer userId) {
         return repository
                 .findTop10ByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
@@ -50,12 +50,12 @@ public class SearchHistoryService {
     }
 
     @Transactional
-    public void deleteOne(Long userId, String query) {
+    public void deleteOne(Integer userId, String query) {
         repository.deleteByUserIdAndSearchText(userId, query);
     }
 
     @Transactional
-    public void deleteAll(Long userId) {
+    public void deleteAll(Integer userId) {
         repository.deleteByUserId(userId);
     }
 }

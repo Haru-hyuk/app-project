@@ -25,7 +25,7 @@ public class ViewHistoryController {
      */
     @GetMapping
     public ResponseEntity<List<ViewHistoryResponse>> getViewHistory() {
-        Long userId = getCurrentUserId();
+        Integer userId = getCurrentUserId();
         return ResponseEntity.ok(viewHistoryService.getViewHistory(userId));
     }
 
@@ -34,10 +34,10 @@ public class ViewHistoryController {
      */
     @PostMapping
     public ResponseEntity<Map<String, String>> saveViewHistory(
-            @RequestBody Map<String, Long> body
+            @RequestBody Map<String, Integer> body
     ) {
-        Long userId = getCurrentUserId();
-        Long flowerId = body.get("flowerId");
+        Integer userId = getCurrentUserId();
+        Integer flowerId = body.get("flowerId");
         viewHistoryService.saveViewHistory(userId, flowerId);
         return ResponseEntity.ok(Map.of("message", "조회 기록이 저장되었습니다."));
     }
@@ -47,9 +47,9 @@ public class ViewHistoryController {
      */
     @DeleteMapping("/{viewId}")
     public ResponseEntity<Map<String, String>> deleteViewHistory(
-            @PathVariable Long viewId
+            @PathVariable Integer viewId
     ) {
-        Long userId = getCurrentUserId();
+        Integer userId = getCurrentUserId();
         viewHistoryService.deleteViewHistory(userId, viewId);
         return ResponseEntity.ok(Map.of("message", "조회 기록이 삭제되었습니다."));
     }
@@ -59,7 +59,7 @@ public class ViewHistoryController {
      */
     @DeleteMapping
     public ResponseEntity<Map<String, String>> deleteAllViewHistory() {
-        Long userId = getCurrentUserId();
+        Integer userId = getCurrentUserId();
         viewHistoryService.deleteAllViewHistory(userId);
         return ResponseEntity.ok(Map.of("message", "모든 조회 기록이 삭제되었습니다."));
     }
@@ -67,7 +67,7 @@ public class ViewHistoryController {
     /**
      * 현재 로그인한 사용자 ID 조회
      */
-    private Long getCurrentUserId() {
+    private Integer getCurrentUserId() {
         String email = SecurityUtil.getCurrentUserEmail();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
