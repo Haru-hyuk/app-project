@@ -31,6 +31,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(req));
     }
 
+    @PostMapping("/social-login")
+    public ResponseEntity<TokenResponse> socialLogin(@RequestBody SocialLoginRequest req) {
+        return ResponseEntity.ok(authService.socialLogin(req));
+    }
+
     /** Refresh 토큰 재발급 */
     @PostMapping("/refresh")
     public ResponseEntity<TokenResponse> refresh(@RequestBody RefreshRequest req) {

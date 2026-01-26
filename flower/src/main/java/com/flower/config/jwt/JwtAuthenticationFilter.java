@@ -28,6 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 🔓 JWT 검사 제외 (토큰 발급/복구용 API + 정적 리소스)
         return uri.equals("/api/auth/login")
+                || uri.equals("/api/auth/social-login")
                 || uri.equals("/api/auth/signup")
                 || uri.equals("/api/auth/refresh")
                 || uri.equals("/api/auth/check-email")
