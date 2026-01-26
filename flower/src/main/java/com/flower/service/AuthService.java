@@ -4,6 +4,8 @@ import com.flower.config.jwt.JwtTokenProvider;
 import com.flower.dto.auth.*;
 import com.flower.entity.RefreshToken;
 import com.flower.entity.User;
+import com.flower.external.kakao.KakaoAuthClient;
+import com.flower.external.kakao.KakaoUserInfo;
 import com.flower.exception.CustomException;
 import com.flower.exception.ErrorCode;
 import com.flower.repository.FavoriteRepository;
@@ -16,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -27,6 +31,7 @@ public class AuthService {
     private final ViewHistoryRepository viewHistoryRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final KakaoAuthClient kakaoAuthClient;
 
     /* =========================
        회원가입
@@ -68,24 +73,39 @@ public class AuthService {
             throw new CustomException(ErrorCode.AUTH_UNAUTHORIZED);
         }
 
-        String accessToken =
-                jwtTokenProvider.generateAccessToken(user.getEmail());
-        String refreshToken =
-                jwtTokenProvider.generateRefreshToken(user.getEmail());
+        return issueTokens(user.getEmail());
+    }
 
-        RefreshToken tokenEntity = refreshTokenRepository
-                .findByUserEmail(user.getEmail())
-                .orElse(
-                        RefreshToken.builder()
-                                .userEmail(user.getEmail())
-                                .token(refreshToken)
-                                .build()
-                );
+    /* =========================
+       Social Login (Kakao)
+       ========================= */
+    @Transactional
+    public TokenResponse socialLogin(SocialLoginRequest req) {
+        if (req == null || req.getProvider() == null || req.getAccessToken() == null) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
 
-        tokenEntity.updateToken(refreshToken);
-        refreshTokenRepository.save(tokenEntity);
+        if (!"kakao".equalsIgnoreCase(req.getProvider())) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
 
-        return new TokenResponse(accessToken, refreshToken);
+        KakaoUserInfo userInfo;
+        try {
+            userInfo = kakaoAuthClient.getUserInfo(req.getAccessToken());
+        } catch (RuntimeException e) {
+            throw new CustomException(ErrorCode.AUTH_UNAUTHORIZED);
+        }
+
+        if (userInfo == null || userInfo.getId() == null) {
+            throw new CustomException(ErrorCode.AUTH_UNAUTHORIZED);
+        }
+
+        String email = resolveEmail(userInfo);
+
+        User user = userRepository.findByEmail(email)
+                .orElseGet(() -> createSocialUser(userInfo, email));
+
+        return issueTokens(user.getEmail());
     }
 
     /* =========================
@@ -178,6 +198,7 @@ public class AuthService {
         return userRepository.existsByNickname(nickname);
     }
 
+<<<<<<< Updated upstream
     /* =========================
        회원 탈퇴
        ========================= */
@@ -202,5 +223,78 @@ public class AuthService {
 
         // 사용자 삭제
         userRepository.delete(user);
+=======
+    private TokenResponse issueTokens(String email) {
+        String accessToken = jwtTokenProvider.generateAccessToken(email);
+        String refreshToken = jwtTokenProvider.generateRefreshToken(email);
+
+        RefreshToken tokenEntity = refreshTokenRepository
+                .findByUserEmail(email)
+                .orElse(
+                        RefreshToken.builder()
+                                .userEmail(email)
+                                .token(refreshToken)
+                                .build()
+                );
+
+        tokenEntity.updateToken(refreshToken);
+        refreshTokenRepository.save(tokenEntity);
+
+        return new TokenResponse(accessToken, refreshToken);
+    }
+
+    private User createSocialUser(KakaoUserInfo userInfo, String email) {
+        String nickname = resolveNickname(userInfo);
+        String userName = resolveUserName(userInfo, nickname);
+        String userBirth = resolveUserBirth(userInfo);
+        String profileImage = resolveProfileImage(userInfo);
+
+        User user = User.builder()
+                .email(email)
+                .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                .nickname(nickname)
+                .userName(userName)
+                .userBirth(userBirth)
+                .oauthProvider("kakao")
+                .profileImage(profileImage)
+                .build();
+
+        return userRepository.save(user);
+    }
+
+    private String resolveEmail(KakaoUserInfo userInfo) {
+        return "kakao_" + userInfo.getId() + "@kakao.local";
+    }
+
+    private String resolveNickname(KakaoUserInfo userInfo) {
+        if (userInfo.getKakaoAccount() != null
+                && userInfo.getKakaoAccount().getProfile() != null) {
+            String nickname = userInfo.getKakaoAccount().getProfile().getNickname();
+            if (hasText(nickname)) {
+                return nickname;
+            }
+        }
+        return "kakao_" + userInfo.getId();
+    }
+
+    private String resolveUserName(KakaoUserInfo userInfo, String fallback) {
+        return fallback;
+    }
+
+    private String resolveUserBirth(KakaoUserInfo userInfo) {
+        return "00000000";
+    }
+
+    private String resolveProfileImage(KakaoUserInfo userInfo) {
+        if (userInfo.getKakaoAccount() != null
+                && userInfo.getKakaoAccount().getProfile() != null) {
+            return userInfo.getKakaoAccount().getProfile().getProfileImageUrl();
+        }
+        return null;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
+>>>>>>> Stashed changes
     }
 }

@@ -55,6 +55,7 @@ public class SecurityConfig {
                         // 인증 없이 허용 (Auth 관련 + 정적 리소스 + 인기 키워드)
                         .requestMatchers(
                                 "/api/auth/login",
+                                "/api/auth/social-login",
                                 "/api/auth/signup",
                                 "/api/auth/refresh",
                                 "/api/auth/check-email",
