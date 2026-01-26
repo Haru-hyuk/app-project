@@ -27,6 +27,9 @@ public class SearchHistory {
     @Column(name = "search_text", nullable = false, length = 200)
     private String searchText;
 
+    @Column(name = "search_detail", nullable = true, length = 500)
+    private String searchDetail;  // 검색 상세 정보 (nullable)
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
