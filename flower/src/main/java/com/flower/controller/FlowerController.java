@@ -6,6 +6,7 @@ import com.flower.entity.User;
 import com.flower.repository.UserRepository;
 import com.flower.security.SecurityUtil;
 import com.flower.service.FlowerService;
+import com.flower.service.KeywordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,7 @@ public class FlowerController {
 
     private final FlowerService flowerService;
     private final UserRepository userRepository;
+    private final KeywordService keywordService;
 
     /**
      * 전체 꽃 목록 조회
@@ -51,6 +53,28 @@ public class FlowerController {
     }
 
     /**
+     * 계절별 랜덤 꽃 1개 조회 (최적화)
+     */
+    @GetMapping("/season/random")
+    public ResponseEntity<FlowerListResponse> getRandomFlowerBySeason(
+            @RequestParam String season
+    ) {
+        FlowerListResponse flower = flowerService.getRandomFlowerBySeason(season);
+        if (flower == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(flower);
+    }
+
+    /**
+     * 모든 계절의 랜덤 꽃 한 번에 조회 (4번 호출 → 1번 호출로 최적화)
+     */
+    @GetMapping("/season/random/all")
+    public ResponseEntity<java.util.Map<String, FlowerListResponse>> getRandomFlowersForAllSeasons() {
+        return ResponseEntity.ok(flowerService.getRandomFlowersForAllSeasons());
+    }
+
+    /**
      * 꽃 상세 정보 조회
      */
     @GetMapping("/{flowerId}")
@@ -79,6 +103,23 @@ public class FlowerController {
             @RequestParam String name
     ) {
         return ResponseEntity.ok(flowerService.searchFlowersByName(name));
+    }
+
+    /**
+     * 꽃말/키워드로 검색 (검색 결과가 있으면 인기 키워드 카운트 증가)
+     */
+    @GetMapping("/search/floriography")
+    public ResponseEntity<List<FlowerListResponse>> searchByFloriography(
+            @RequestParam String query
+    ) {
+        List<FlowerListResponse> results = flowerService.searchFlowersByFloriography(query);
+
+        // 검색 결과가 있으면 인기 키워드 카운트 증가
+        if (!results.isEmpty()) {
+            keywordService.incrementKeywordCount(query);
+        }
+
+        return ResponseEntity.ok(results);
     }
 
     /**

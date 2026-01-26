@@ -42,14 +42,38 @@ public class FlowerService {
     }
 
     /**
-     * 계절별 꽃 목록 조회
+     * 계절별 꽃 목록 조회 (최적화: DB 레벨 JSON 필터링)
      */
     public List<FlowerListResponse> getFlowersBySeason(String season) {
-        return flowerRepository.findAll()
+        return flowerRepository.findBySeason(season)
                 .stream()
-                .filter(f -> f.getSeason() != null && f.getSeason().contains(season))
                 .map(FlowerListResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 계절별 랜덤 꽃 1개 조회 (최적화: DB 레벨에서 랜덤 선택)
+     */
+    public FlowerListResponse getRandomFlowerBySeason(String season) {
+        return flowerRepository.findRandomFlowerBySeason(season)
+                .map(FlowerListResponse::from)
+                .orElse(null);
+    }
+
+    /**
+     * 모든 계절의 랜덤 꽃 한 번에 조회 (4번 호출 → 1번 호출로 최적화)
+     */
+    public java.util.Map<String, FlowerListResponse> getRandomFlowersForAllSeasons() {
+        java.util.Map<String, FlowerListResponse> result = new java.util.LinkedHashMap<>();
+        String[] seasons = {"spring", "summer", "autumn", "winter"};
+
+        for (String season : seasons) {
+            FlowerListResponse flower = getRandomFlowerBySeason(season);
+            if (flower != null) {
+                result.put(season, flower);
+            }
+        }
+        return result;
     }
 
     /**
@@ -75,13 +99,11 @@ public class FlowerService {
     }
 
     /**
-     * 키워드로 꽃 검색
+     * 키워드로 꽃 검색 - DB 레벨 최적화
      */
     public List<FlowerListResponse> getFlowersByKeyword(String keyword) {
-        return flowerRepository.findAll()
+        return flowerRepository.findByKeywordContaining(keyword)
                 .stream()
-                .filter(f -> f.getFlowerKeyword() != null &&
-                        f.getFlowerKeyword().stream().anyMatch(k -> k.contains(keyword)))
                 .map(FlowerListResponse::from)
                 .collect(Collectors.toList());
     }
@@ -94,5 +116,22 @@ public class FlowerService {
                 .stream()
                 .map(FlowerListResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 꽃말로 검색 (floriography와 keyword 모두 검색) - DB 레벨 최적화
+     */
+    public List<FlowerListResponse> searchFlowersByFloriography(String query) {
+        return flowerRepository.findByFloriographyOrKeywordContaining(query)
+                .stream()
+                .map(FlowerListResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 검색어가 flower 테이블의 꽃말/키워드에 존재하는지 확인 - DB 레벨 최적화
+     */
+    public boolean existsInFloriographyOrKeyword(String query) {
+        return !flowerRepository.findByFloriographyOrKeywordContaining(query).isEmpty();
     }
 }
