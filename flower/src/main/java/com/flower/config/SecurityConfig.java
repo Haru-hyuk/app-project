@@ -52,7 +52,7 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        // 인증 없이 허용 (Auth 관련 + 정적 리소스)
+                        // 인증 없이 허용 (Auth 관련 + 정적 리소스 + 인기 키워드)
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/signup",
@@ -61,9 +61,14 @@ public class SecurityConfig {
                                 "/api/auth/check-nickname",
                                 "/api/auth/find-email",
                                 "/api/auth/reset-password",
+                                "/api/keywords/popular",
+                                "/api/keywords/trending",
+                                "/api/keywords/search",
+                                "/api/shops/nearby",
 
                                 "/", "/index.html",
                                 "/assets/**",
+                                "/flower_images/**", // 꽃 이미지 정적 리소스 허용
                                 "/*.js", "/*.css", "/*.svg",
                                 "/*.png", "/*.ico", "/*.woff2"
                         ).permitAll()

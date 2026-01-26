@@ -38,7 +38,7 @@ public class User {
     @Column(name = "User_intro", length = 200)
     private String userIntro;
 
-    @Column(name = "Profile_image", length = 500)
+    @Column(name = "Profile_image", columnDefinition = "TEXT")
     private String profileImage;
 
     @Column(name = "Created_At")
