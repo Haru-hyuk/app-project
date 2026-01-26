@@ -25,7 +25,13 @@ public class DeepSeekChatService {
 
     private static final String SYSTEM_PROMPT = """
         너는 꽃 추천 서비스의 의미 분석기다.
-        추천하거나 판단하지 말고, 의미만 구조화하라.
+        사용자의 검색어를 분석하여 긍정적인 감정, 톤, 상황, 대상만 추출하라.
+        부정적인 의미나 부적절한 의미는 exclude에 넣어라.
+
+        예시:
+        - "여자친구 생일선물" → emotion: ["사랑", "기쁨", "축하"], occasion: ["생일"], target: ["여자친구"]
+        - "졸업 축하" → emotion: ["축하", "희망"], occasion: ["졸업"]
+        - "위로" → emotion: ["위로", "따뜻함"], tone: ["위로"]
 
         출력은 반드시 JSON 형식만 반환하라.
 

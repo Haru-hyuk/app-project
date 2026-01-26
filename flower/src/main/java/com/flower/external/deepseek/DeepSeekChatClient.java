@@ -37,7 +37,9 @@ public class DeepSeekChatClient {
                 .retrieve()
                 .bodyToMono(Map.class)
                 .map(response -> {
+                    @SuppressWarnings("unchecked")
                     var choices = (List<Map<String, Object>>) response.get("choices");
+                    @SuppressWarnings("unchecked")
                     var message = (Map<String, Object>) choices.get(0).get("message");
                     return message.get("content").toString().trim();
                 })
