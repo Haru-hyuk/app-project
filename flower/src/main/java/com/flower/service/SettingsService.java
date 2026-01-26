@@ -2,7 +2,6 @@ package com.flower.service;
 
 import com.flower.dto.settings.SettingsRequest;
 import com.flower.dto.settings.SettingsResponse;
-import com.flower.entity.User;
 import com.flower.repository.UserRepository;
 import com.flower.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;

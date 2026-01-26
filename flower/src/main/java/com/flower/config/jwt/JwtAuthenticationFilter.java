@@ -26,7 +26,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String uri = request.getRequestURI();
 
-        // 🔓 JWT 검사 제외 (토큰 발급/복구용 API만)
+        // 🔓 JWT 검사 제외 (토큰 발급/복구용 API + 정적 리소스)
         return uri.equals("/api/auth/login")
                 || uri.equals("/api/auth/signup")
                 || uri.equals("/api/auth/refresh")
@@ -35,7 +35,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 || uri.equals("/api/auth/find-email")
                 || uri.equals("/api/auth/reset-password")
                 || uri.startsWith("/oauth2/")
-                || uri.startsWith("/login/oauth2/");
+                || uri.startsWith("/login/oauth2/")
+                || uri.startsWith("/flower_images/")  // 정적 이미지 리소스 제외
+                || uri.startsWith("/api/keywords/popular")  // 인기 키워드 제외
+                || uri.startsWith("/api/keywords/trending");  // 트렌딩 키워드 제외
     }
 
     @Override
