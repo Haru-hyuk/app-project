@@ -7,6 +7,7 @@ import com.flower.repository.FavoriteRepository;
 import com.flower.repository.FlowerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -55,7 +56,10 @@ public class FlowerService {
      * 계절별 랜덤 꽃 1개 조회 (최적화: DB 레벨에서 랜덤 선택)
      */
     public FlowerListResponse getRandomFlowerBySeason(String season) {
-        return flowerRepository.findRandomFlowerBySeason(season)
+        return flowerRepository
+                .findRandomFlowerBySeason(season, PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
                 .map(FlowerListResponse::from)
                 .orElse(null);
     }

@@ -65,9 +65,7 @@ public class AuthService {
     public TokenResponse login(LoginRequest req) {
 
         User user = userRepository.findByEmail(req.getEmail())
-                .orElseThrow(() ->
-                        new CustomException(ErrorCode.AUTH_UNAUTHORIZED)
-                );
+                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_UNAUTHORIZED));
 
         if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
             throw new CustomException(ErrorCode.AUTH_UNAUTHORIZED);
@@ -81,6 +79,7 @@ public class AuthService {
        ========================= */
     @Transactional
     public TokenResponse socialLogin(SocialLoginRequest req) {
+
         if (req == null || req.getProvider() == null || req.getAccessToken() == null) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
@@ -114,27 +113,18 @@ public class AuthService {
     @Transactional
     public TokenResponse refresh(String refreshToken) {
 
-        // 1️⃣ Refresh Token JWT 검증 (exp 포함)
         if (!jwtTokenProvider.validateRefreshToken(refreshToken)) {
             throw new CustomException(ErrorCode.AUTH_INVALID_TOKEN);
         }
 
-        // 2️⃣ DB에 저장된 토큰과 비교
         RefreshToken saved = refreshTokenRepository.findByToken(refreshToken)
-                .orElseThrow(() ->
-                        new CustomException(ErrorCode.AUTH_INVALID_TOKEN)
-                );
+                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_INVALID_TOKEN));
 
         User user = userRepository.findByEmail(saved.getUserEmail())
-                .orElseThrow(() ->
-                        new CustomException(ErrorCode.AUTH_UNAUTHORIZED)
-                );
+                .orElseThrow(() -> new CustomException(ErrorCode.AUTH_UNAUTHORIZED));
 
-        // 3️⃣ 새 토큰 발급
-        String newAccess =
-                jwtTokenProvider.generateAccessToken(user.getEmail());
-        String newRefresh =
-                jwtTokenProvider.generateRefreshToken(user.getEmail());
+        String newAccess = jwtTokenProvider.generateAccessToken(user.getEmail());
+        String newRefresh = jwtTokenProvider.generateRefreshToken(user.getEmail());
 
         saved.updateToken(newRefresh);
         refreshTokenRepository.save(saved);
@@ -157,13 +147,8 @@ public class AuthService {
     public FindEmailResponse findEmail(FindEmailRequest req) {
 
         User user = userRepository
-                .findByUserNameAndUserBirth(
-                        req.getUserName(),
-                        req.getUserBirth()
-                )
-                .orElseThrow(() ->
-                        new CustomException(ErrorCode.INVALID_REQUEST)
-                );
+                .findByUserNameAndUserBirth(req.getUserName(), req.getUserBirth())
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
 
         return new FindEmailResponse(user.getEmail());
     }
@@ -175,13 +160,8 @@ public class AuthService {
     public void resetPassword(ResetPasswordRequest req) {
 
         User user = userRepository
-                .findByUserNameAndEmail(
-                        req.getUserName(),
-                        req.getEmail()
-                )
-                .orElseThrow(() ->
-                        new CustomException(ErrorCode.INVALID_REQUEST)
-                );
+                .findByUserNameAndEmail(req.getUserName(), req.getEmail())
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
 
         String tempPassword = "temp1234";
         user.changePassword(passwordEncoder.encode(tempPassword));
@@ -198,33 +178,36 @@ public class AuthService {
         return userRepository.existsByNickname(nickname);
     }
 
-<<<<<<< Updated upstream
     /* =========================
        회원 탈퇴
        ========================= */
     @Transactional
     public void deleteAccount(String email, String password) {
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.AUTH_UNAUTHORIZED));
 
-        // 비밀번호 검증
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new CustomException(ErrorCode.AUTH_UNAUTHORIZED);
         }
 
         Integer userId = user.getUserId();
 
-        // 연관 데이터 삭제
         favoriteRepository.deleteByUserId(userId);
         searchHistoryRepository.deleteByUserId(userId);
         viewHistoryRepository.deleteByUserId(userId);
+
         refreshTokenRepository.findByUserEmail(email)
                 .ifPresent(refreshTokenRepository::delete);
 
-        // 사용자 삭제
         userRepository.delete(user);
-=======
+    }
+
+    /* =========================
+       내부 메서드
+       ========================= */
     private TokenResponse issueTokens(String email) {
+
         String accessToken = jwtTokenProvider.generateAccessToken(email);
         String refreshToken = jwtTokenProvider.generateRefreshToken(email);
 
@@ -244,6 +227,7 @@ public class AuthService {
     }
 
     private User createSocialUser(KakaoUserInfo userInfo, String email) {
+
         String nickname = resolveNickname(userInfo);
         String userName = resolveUserName(userInfo, nickname);
         String userBirth = resolveUserBirth(userInfo);
@@ -267,8 +251,10 @@ public class AuthService {
     }
 
     private String resolveNickname(KakaoUserInfo userInfo) {
+
         if (userInfo.getKakaoAccount() != null
                 && userInfo.getKakaoAccount().getProfile() != null) {
+
             String nickname = userInfo.getKakaoAccount().getProfile().getNickname();
             if (hasText(nickname)) {
                 return nickname;
@@ -286,6 +272,7 @@ public class AuthService {
     }
 
     private String resolveProfileImage(KakaoUserInfo userInfo) {
+
         if (userInfo.getKakaoAccount() != null
                 && userInfo.getKakaoAccount().getProfile() != null) {
             return userInfo.getKakaoAccount().getProfile().getProfileImageUrl();
@@ -295,6 +282,5 @@ public class AuthService {
 
     private boolean hasText(String value) {
         return value != null && !value.isBlank();
->>>>>>> Stashed changes
     }
 }
