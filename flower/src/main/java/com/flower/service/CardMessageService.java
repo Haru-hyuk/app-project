@@ -1,6 +1,8 @@
 package com.flower.service;
 
+import com.flower.entity.FlowerMessage;
 import com.flower.external.deepseek.DeepSeekChatClient;
+import com.flower.repository.FlowerMessageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,7 @@ import java.util.List;
 public class CardMessageService {
 
     private final DeepSeekChatClient deepSeekChatClient;
+    private final FlowerMessageRepository flowerMessageRepository;
 
     public String generateCardMessage(
             String flowerName,
@@ -19,6 +22,29 @@ public class CardMessageService {
     ) {
         String prompt = buildPrompt(flowerName, floriography, query);
         return deepSeekChatClient.generateMessage(prompt);
+    }
+
+    /**
+     * 메시지 생성 + DB 저장
+     */
+    public String generateAndSaveCardMessage(
+            Integer userId,
+            Integer flowerId,
+            String flowerName,
+            List<String> floriography,
+            String query
+    ) {
+        String message = generateCardMessage(flowerName, floriography, query);
+
+        // DB에 저장
+        FlowerMessage flowerMessage = FlowerMessage.builder()
+                .userId(userId)
+                .flowerId(flowerId)
+                .message(message)
+                .build();
+        flowerMessageRepository.save(flowerMessage);
+
+        return message;
     }
 
     private String buildPrompt(
