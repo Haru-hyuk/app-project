@@ -2,6 +2,7 @@ package com.flower.repository;
 
 import com.flower.entity.Favorites;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,11 +19,13 @@ public interface FavoriteRepository extends JpaRepository<Favorites, Integer> {
     boolean existsByUserIdAndFlowerId(Integer userId, Integer flowerId);
 
     // 특정 꽃 즐겨찾기 삭제
+    @Modifying
     void deleteByUserIdAndFlowerId(Integer userId, Integer flowerId);
 
     // 사용자의 즐겨찾기 개수
     long countByUserId(Integer userId);
 
     // 사용자의 모든 즐겨찾기 삭제
+    @Modifying
     void deleteByUserId(Integer userId);
 }

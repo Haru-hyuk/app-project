@@ -63,7 +63,7 @@ public class SearchController {
     }
 
     @DeleteMapping("/recent")
-    public void deleteOne(@RequestParam String query) {
+    public ResponseEntity<Map<String, String>> deleteOne(@RequestParam String query) {
 
         String email = SecurityUtil.getCurrentUserEmail();
 
@@ -71,10 +71,11 @@ public class SearchController {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         searchHistoryService.deleteOne(user.getUserId(), query);
+        return ResponseEntity.ok(Map.of("message", "검색 기록이 삭제되었습니다."));
     }
 
     @DeleteMapping("/recent/all")
-    public void deleteAll() {
+    public ResponseEntity<Map<String, String>> deleteAll() {
 
         String email = SecurityUtil.getCurrentUserEmail();
 
@@ -82,5 +83,6 @@ public class SearchController {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         searchHistoryService.deleteAll(user.getUserId());
+        return ResponseEntity.ok(Map.of("message", "모든 검색 기록이 삭제되었습니다."));
     }
 }
