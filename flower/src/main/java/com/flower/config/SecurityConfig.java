@@ -52,7 +52,7 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
-                        // 인증 없이 허용 (Auth 관련 + 정적 리소스 + 인기 키워드)
+                        // 인증 없이 허용 (Auth 관련 + 정적 리소스 + 인기 키워드 + 꽃 조회)
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/social-login",
@@ -66,6 +66,8 @@ public class SecurityConfig {
                                 "/api/keywords/trending",
                                 "/api/keywords/search",
                                 "/api/shops/nearby",
+                                "/api/flowers/**",  // 꽃 조회 API 허용
+                                "/api/shops/**",    // 꽃집 조회 API 허용
 
                                 "/", "/index.html",
                                 "/assets/**",
