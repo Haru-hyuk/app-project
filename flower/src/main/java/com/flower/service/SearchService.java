@@ -9,10 +9,10 @@ import com.flower.util.VectorSimilarityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,8 +24,9 @@ public class SearchService {
     private final EmbeddingService embeddingService;
     private final FlowerRepository flowerRepository;
 
-    private static final int MAX_SEARCH_RESULTS = 5;  // 최대 검색 결과 수 (유사도 top 5)
-    private static final double MIN_SIMILARITY = 0.0;  // 최소 유사도 (필요시 조정)
+    private static final int TOP_K_CANDIDATES = 30;     // 1차 유사도 상위 후보 수
+    private static final int FINAL_RESULTS = 5;          // 최종 반환 결과 수
+    private static final double MIN_SIMILARITY = 0.0;    // 최소 유사도 (필요시 조정)
 
     /**
      * 벡터 유사도 기반 꽃 검색 (폴백 없음)
@@ -69,53 +70,25 @@ public class SearchService {
             throw new RuntimeException("차원 불일치: 쿼리 임베딩(" + queryEmbeddingDimension + "차원)과 꽃 임베딩(" + firstFlowerDimension + "차원)이 일치하지 않습니다.");
         }
 
-        // exclude에 포함된 부정적인 키워드 목록
-        Set<String> excludeKeywords = new HashSet<>();
-        if (intent.getExclude() != null) {
-            intent.getExclude().forEach(e -> excludeKeywords.add(e.trim().toLowerCase()));
+        // 후보 꽃이 적으면 항상 비슷한 추천만 나옴 (원인 확인용 로그)
+        if (flowersWithMatchingDimension < 20) {
+            // SLF4J/Logback 사용 시: log.warn("시멘틱 검색 후보 꽃 수가 적음: {} (전체 꽃 중 임베딩 있음: {}) → POST /api/embedding/regenerate-all 로 전체 임베딩 생성 필요", flowersWithMatchingDimension, flowersWithEmbedding);
+            System.err.println("[시멘틱 검색] 후보 꽃 수: " + flowersWithMatchingDimension + ", 임베딩 있는 꽃: " + flowersWithEmbedding + " → 같은 추천만 나오면 POST /api/embedding/regenerate-all 실행 필요");
         }
-        
-        // 부정적인 꽃말 키워드 (exclude에 자동 추가)
-        Set<String> negativeKeywords = Set.of(
-            "절망", "이루어지지 않는", "이루어지지않는", "이루어지지 않는 사랑",
-            "사랑의 절망", "이별", "슬픔", "고통", "비애", "절망감"
-        );
-        excludeKeywords.addAll(negativeKeywords);
 
-        // 5. 벡터 유사도 계산 및 정렬 (차원이 일치하는 꽃만)
-        List<FlowerSearchResult> results = allFlowers.stream()
+        System.out.println("[검색 디버그] 전체 꽃: " + allFlowers.size()
+                + ", 임베딩 있는 꽃: " + flowersWithEmbedding
+                + ", 차원 일치 꽃: " + flowersWithMatchingDimension
+                + ", 쿼리 차원: " + queryEmbeddingDimension
+                + ", 꽃 차원: " + firstFlowerDimension);
+
+        // 5. 벡터 유사도 계산 → 상위 30개 후보 선정 (차원이 일치하는 꽃만)
+        List<FlowerSearchResult> topKCandidates = allFlowers.stream()
                 .filter(flower -> {
                     if (flower.getEmbedding() == null || flower.getEmbedding().isEmpty()) {
                         return false;
                     }
-                    // 차원이 일치하는 꽃만 필터링
-                    if (flower.getEmbedding().size() != queryEmbeddingDimension) {
-                        return false;
-                    }
-                    
-                    // 부정적인 꽃말/키워드를 가진 꽃 필터링
-                    if (flower.getFloriography() != null) {
-                        for (String floriography : flower.getFloriography()) {
-                            String lowerFloriography = floriography.toLowerCase();
-                            for (String exclude : excludeKeywords) {
-                                if (lowerFloriography.contains(exclude)) {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-                    if (flower.getFlowerKeyword() != null) {
-                        for (String keyword : flower.getFlowerKeyword()) {
-                            String lowerKeyword = keyword.toLowerCase();
-                            for (String exclude : excludeKeywords) {
-                                if (lowerKeyword.contains(exclude)) {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-                    
-                    return true;
+                    return flower.getEmbedding().size() == queryEmbeddingDimension;
                 })
                 .map(flower -> {
                     double similarity = VectorSimilarityUtil.cosineSimilarity(
@@ -129,8 +102,24 @@ public class SearchService {
                 })
                 .filter(result -> result.getSimilarity() >= MIN_SIMILARITY)
                 .sorted(Comparator.comparing(FlowerSearchResult::getSimilarity).reversed())
-                .limit(MAX_SEARCH_RESULTS)
+                .limit(TOP_K_CANDIDATES)
                 .collect(Collectors.toList());
+
+        System.out.println("[검색 디버그] top-30 후보 수: " + topKCandidates.size()
+                + ", 셔플 전: " + topKCandidates.stream()
+                    .map(r -> r.getFlower().getFlowerName())
+                    .collect(Collectors.joining(", ")));
+
+        // 6. 상위 30개를 완전 랜덤 셔플 후 5개 선택
+        Collections.shuffle(topKCandidates);
+
+        List<FlowerSearchResult> results = topKCandidates.stream()
+                .limit(FINAL_RESULTS)
+                .collect(Collectors.toList());
+
+        System.out.println("[검색 디버그] 셔플 후 최종 5개: " + results.stream()
+                .map(r -> r.getFlower().getFlowerName() + "(" + String.format("%.4f", r.getSimilarity()) + ")")
+                .collect(Collectors.joining(", ")));
 
         return results;
     }
