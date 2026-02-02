@@ -96,4 +96,12 @@ public class FavoriteService {
     public long getFavoriteCount(Integer userId) {
         return favoriteRepository.countByUserId(userId);
     }
+
+    /**
+     * 모든 즐겨찾기 삭제
+     */
+    @Transactional
+    public void deleteAllFavorites(Integer userId) {
+        favoriteRepository.deleteByUserId(userId);
+    }
 }

@@ -11,8 +11,6 @@ public class KakaoMapClient {
     private final WebClient webClient;
 
     public KakaoMapClient(@Value("${kakao.rest-api-key}") String apiKey) {
-        System.out.println("🔥 Kakao REST KEY = " + apiKey);
-
         this.webClient = WebClient.builder()
                 .baseUrl("https://dapi.kakao.com")
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "KakaoAK " + apiKey)
@@ -45,9 +43,6 @@ public class KakaoMapClient {
                                 )
                 )
                 .bodyToMono(String.class)
-                .doOnNext(res ->
-                        System.out.println("🔥 Kakao raw response = " + res)
-                )
                 .block();
     }
 }

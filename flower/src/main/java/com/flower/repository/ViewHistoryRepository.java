@@ -2,6 +2,7 @@ package com.flower.repository;
 
 import com.flower.entity.ViewHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 
 import java.util.List;
 
@@ -14,8 +15,10 @@ public interface ViewHistoryRepository extends JpaRepository<ViewHistory, Intege
     List<ViewHistory> findTop20ByUserIdOrderByCreatedAtDesc(Integer userId);
 
     // 특정 조회 기록 삭제
+    @Modifying
     void deleteByViewIdAndUserId(Integer viewId, Integer userId);
 
     // 사용자의 모든 조회 기록 삭제
+    @Modifying
     void deleteByUserId(Integer userId);
 }

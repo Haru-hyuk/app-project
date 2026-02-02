@@ -49,7 +49,6 @@ public class ShopService {
             }
             return result;
         } catch (Exception e) {
-            e.printStackTrace(); // 🔥 콘솔에 진짜 원인 찍기
             throw new RuntimeException(e.getMessage());
         }
     }

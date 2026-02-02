@@ -4,6 +4,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.resource.PathResourceResolver;
+import org.springframework.web.servlet.resource.EncodedResourceResolver;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -15,11 +17,15 @@ public class WebConfig implements WebMvcConfigurer {
         // 실제 파일 위치: src/main/resources/flower_images/
         registry.addResourceHandler("/flower_images/**")
                 .addResourceLocations(
-                    "classpath:/flower_images/",  // src/main/resources/flower_images/
+                    "file:./src/main/resources/flower_images/",  // 개발 환경
+                    "classpath:/flower_images/",  // JAR 배포 환경
                     "file:./flower_images/",
                     "file:../flower_images/"
                 )
-                .setCachePeriod(3600); // 1시간 캐시
+                .setCachePeriod(3600) // 1시간 캐시
+                .resourceChain(true)
+                .addResolver(new EncodedResourceResolver())
+                .addResolver(new PathResourceResolver());
     }
 
     @Override

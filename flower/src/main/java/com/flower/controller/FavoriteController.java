@@ -65,6 +65,16 @@ public class FavoriteController {
     }
 
     /**
+     * 모든 즐겨찾기 삭제
+     */
+    @DeleteMapping
+    public ResponseEntity<Map<String, String>> removeAllFavorites() {
+        Integer userId = getCurrentUserId();
+        favoriteService.deleteAllFavorites(userId);
+        return ResponseEntity.ok(Map.of("message", "모든 즐겨찾기가 삭제되었습니다."));
+    }
+
+    /**
      * 현재 로그인한 사용자 ID 조회
      */
     private Integer getCurrentUserId() {
